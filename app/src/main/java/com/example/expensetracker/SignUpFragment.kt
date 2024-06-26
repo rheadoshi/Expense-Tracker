@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -16,10 +15,10 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [sign_up.newInstance] factory method to
+ * Use the [SignUpFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class sign_up : Fragment() {
+class SignUpFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -50,7 +49,7 @@ class sign_up : Fragment() {
         button.setOnClickListener {
             val _activity = activity as MainActivity
             _activity.addData("phone_number",ph.toString())
-            _activity.setCurrView(SignUpPin())
+            _activity.setCurrView(SignUpPinFragment())
         }
 //        val txt = views.findViewById<TextView>(R.id.login)
 //        txt.text = "Login"
@@ -69,7 +68,7 @@ class sign_up : Fragment() {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            sign_up().apply {
+            SignUpFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)

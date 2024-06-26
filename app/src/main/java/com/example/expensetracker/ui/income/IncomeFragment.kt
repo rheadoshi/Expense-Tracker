@@ -15,20 +15,25 @@ import com.example.expensetracker.R
 import com.example.expensetracker.databinding.FragmentIncomeBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.app.DatePickerDialog
+import android.util.Log
 import android.widget.TextView
-import com.example.expensetracker.HomePage
-import com.example.expensetracker.MainActivity
+import com.example.expensetracker.HomePageActivity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class IncomeFragment : Fragment() {
 
+
     private var _binding: FragmentIncomeBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    lateinit var root: View
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,71 +44,87 @@ class IncomeFragment : Fragment() {
             ViewModelProvider(this).get(IncomeViewModel::class.java)
 
         _binding = FragmentIncomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        // RecyclerView setup
-        val incomeList = root.findViewById<RecyclerView>(R.id.recyclerView)
-        var incomes = ArrayList<Income>()
-        val incomeAdapter = IncomeAdapter(incomes)
-        incomeList.adapter = incomeAdapter
-        incomeList.layoutManager = LinearLayoutManager(activity)
-
-        // check via shared preferences for old income
-        val _activity = activity as HomePage
-        val json = _activity.listView("income")
-
-
-
-
-
-        val add = root.findViewById<FloatingActionButton>(R.id.add_income)
-        add.setOnClickListener {
-            // Dialog
-            val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_income_add, null)
-            val builder = AlertDialog.Builder(requireContext()).setView(dialogView)
-            val dialogBox = builder.show()
-            var selectedDate = Calendar.getInstance()
-            val saveButton = dialogView.findViewById<Button>(R.id.save_details)
-            val cancelButton = dialogView.findViewById<Button>(R.id.cancel)
-            val dateButton= dialogView.findViewById<Button>(R.id.btnDatePicker)
-            val date_text = dialogView.findViewById<TextView>(R.id.date)
-            dateButton.setOnClickListener {
-                val calendar = Calendar.getInstance()
-                // Show the DatePicker dialog
-                context?.let { it1 ->
-                    DatePickerDialog(
-                        it1, { DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int ->
-                            // Set the selected date using the values received from the DatePicker dialog
-                            selectedDate.set(year, monthOfYear, dayOfMonth)
-                            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            val formattedDate = dateFormat.format(selectedDate.time)
-                            date_text.text = formattedDate
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    )
-                }?.show()
-            }
-            saveButton.setOnClickListener {
-                dialogBox.dismiss()
-                val income = dialogView.findViewById<EditText>(R.id.income_input).text.toString()
-                val source = dialogView.findViewById<EditText>(R.id.source_input).text.toString()
-                val notes = dialogView.findViewById<EditText>(R.id.extra_notes).text.toString()
-                incomes.add(Income.create(income.toInt(), source, notes,date_text.text.toString()))
-                incomeAdapter.notifyDataSetChanged()  // Notify the adapter about the data change
-            }
-            cancelButton.setOnClickListener {
-                dialogBox.dismiss()
-            }
-        }
+        root = binding.root
 
         return root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val _activity = activity as HomePageActivity
+        val gson = Gson()
+        val type: Type = object : TypeToken<ArrayList<Income>>() {}.type
+
+        var list = ArrayList<Income>()
+        val json = _activity.listView("income")
+        Log.d("json vale",json?:"Null")
+        if (json != null) {
+            list = gson.fromJson(json, type)
+        }
+
+        // RecyclerView setup
+        val incomeList = root.findViewById<RecyclerView>(R.id.recyclerView)
+        val incomeAdapter = IncomeAdapter(list)
+        incomeList.adapter = incomeAdapter
+        incomeList.layoutManager = LinearLayoutManager(activity)
+
+        val add = root.findViewById<FloatingActionButton>(R.id.add_income)
+        add.setOnClickListener {
+            showDialogToAddIncome(list, incomeAdapter, gson, _activity)
+        }
+    }
+
+    private fun showDialogToAddIncome(list: ArrayList<Income>, incomeAdapter: IncomeAdapter, gson: Gson, _activity: HomePageActivity) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_income_add, null)
+        val builder = AlertDialog.Builder(requireContext()).setView(dialogView)
+        val dialogBox = builder.show()
+        var selectedDate = Calendar.getInstance()
+        val saveButton = dialogView.findViewById<Button>(R.id.save_details)
+        val cancelButton = dialogView.findViewById<Button>(R.id.cancel)
+        val dateButton = dialogView.findViewById<Button>(R.id.btnDatePicker)
+        val dateText = dialogView.findViewById<TextView>(R.id.date)
+
+        dateButton.setOnClickListener {
+            showDatePicker(selectedDate, dateText)
+        }
+
+        saveButton.setOnClickListener {
+            dialogBox.dismiss()
+            val income = dialogView.findViewById<EditText>(R.id.income_input).text.toString().toInt()
+            val source = dialogView.findViewById<EditText>(R.id.source_input).text.toString()
+            val notes = dialogView.findViewById<EditText>(R.id.extra_notes).text.toString()
+            list.add(Income.create(income, source, notes, dateText.text.toString()))
+            incomeAdapter.notifyDataSetChanged()  // Notify the adapter about the data change
+
+            val json = gson.toJson(list)
+            _activity.addLstView("income", json)
+        }
+
+        cancelButton.setOnClickListener {
+            dialogBox.dismiss()
+        }
+    }
+
+    private fun showDatePicker(selectedDate: Calendar, dateText: TextView) {
+        val calendar = Calendar.getInstance()
+        context?.let {
+            DatePickerDialog(
+                it, { _, year, monthOfYear, dayOfMonth ->
+                    selectedDate.set(year, monthOfYear, dayOfMonth)
+                    val dateFormat = SimpleDateFormat("dd/mm/yyyy", Locale.getDefault())
+                    val formattedDate = dateFormat.format(selectedDate.time)
+                    dateText.text = formattedDate
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 }
+

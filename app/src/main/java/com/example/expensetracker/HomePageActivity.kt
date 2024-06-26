@@ -5,13 +5,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.expensetracker.databinding.ActivityHomePageBinding
 
-class HomePage : AppCompatActivity() {
+class HomePageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomePageBinding
+    private val name = "USER"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +26,7 @@ class HomePage : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_income, R.id.navigation_dashboard, R.id.navigation_expenses
             )
         )
         //setupActionBarWithNavController(navController, appBarConfiguration)
@@ -34,8 +34,18 @@ class HomePage : AppCompatActivity() {
     }
 
     public fun listView(key:String):String?{
-        val sharedPreferences = getSharedPreferences("USER", MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(name, MODE_PRIVATE)
         val json = sharedPreferences.getString(key, null)
+        var editor = sharedPreferences.edit()
+        editor.remove(key)
+        editor.commit()
         return json
+    }
+
+    public fun addLstView(key:String,json:String?){
+        val sharedPreferences = getSharedPreferences(name, MODE_PRIVATE)
+        var editor = sharedPreferences.edit()
+        editor.putString(key,json)
+        editor.commit()
     }
 }
