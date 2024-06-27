@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.app.DatePickerDialog
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import com.example.expensetracker.HomePageActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -26,7 +27,6 @@ import java.util.Calendar
 import java.util.Locale
 
 class IncomeFragment : Fragment() {
-
 
     private var _binding: FragmentIncomeBinding? = null
 
@@ -57,7 +57,6 @@ class IncomeFragment : Fragment() {
 
         var list = ArrayList<Income>()
         val json = _activity.listView("income")
-        Log.d("json vale",json?:"Null")
         if (json != null) {
             list = gson.fromJson(json, type)
         }
@@ -78,6 +77,7 @@ class IncomeFragment : Fragment() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_income_add, null)
         val builder = AlertDialog.Builder(requireContext()).setView(dialogView)
         val dialogBox = builder.show()
+
         var selectedDate = Calendar.getInstance()
         val saveButton = dialogView.findViewById<Button>(R.id.save_details)
         val cancelButton = dialogView.findViewById<Button>(R.id.cancel)
@@ -89,15 +89,28 @@ class IncomeFragment : Fragment() {
         }
 
         saveButton.setOnClickListener {
-            dialogBox.dismiss()
-            val income = dialogView.findViewById<EditText>(R.id.income_input).text.toString().toInt()
-            val source = dialogView.findViewById<EditText>(R.id.source_input).text.toString()
-            val notes = dialogView.findViewById<EditText>(R.id.extra_notes).text.toString()
-            list.add(Income.create(income, source, notes, dateText.text.toString()))
-            incomeAdapter.notifyDataSetChanged()  // Notify the adapter about the data change
+            val incomeInput = dialogView.findViewById<EditText>(R.id.income_input)
+            val sourceInput = dialogView.findViewById<EditText>(R.id.source_input)
+            val notesInput = dialogView.findViewById<EditText>(R.id.extra_notes)
 
-            val json = gson.toJson(list)
-            _activity.addLstView("income", json)
+            val incomeText = incomeInput.text.toString()
+            val sourceText = sourceInput.text.toString()
+            val dateTextValue = dateText.text.toString()
+
+            if (incomeText.isEmpty() || sourceText.isEmpty() || dateTextValue.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter all required values", Toast.LENGTH_SHORT).show()
+            } else {
+                dialogBox.dismiss()
+                val income = incomeText.toInt()
+                val source = sourceText
+                val notes = notesInput.text.toString()
+
+                list.add(Income(income, source, notes, dateTextValue))
+                incomeAdapter.notifyDataSetChanged()  // Notify the adapter about the data change
+
+                val json = gson.toJson(list)
+                _activity.addLstView("income", json)
+            }
         }
 
         cancelButton.setOnClickListener {
@@ -111,7 +124,7 @@ class IncomeFragment : Fragment() {
             DatePickerDialog(
                 it, { _, year, monthOfYear, dayOfMonth ->
                     selectedDate.set(year, monthOfYear, dayOfMonth)
-                    val dateFormat = SimpleDateFormat("dd/mm/yyyy", Locale.getDefault())
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                     val formattedDate = dateFormat.format(selectedDate.time)
                     dateText.text = formattedDate
                 },
@@ -127,4 +140,5 @@ class IncomeFragment : Fragment() {
         _binding = null
     }
 }
+
 

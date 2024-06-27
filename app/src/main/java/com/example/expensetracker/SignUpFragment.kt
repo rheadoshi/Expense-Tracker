@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -48,11 +49,13 @@ class SignUpFragment : Fragment() {
         val ph = views.findViewById<EditText>(R.id.phone_number_input)
         button.setOnClickListener {
             val _activity = activity as MainActivity
-            _activity.addData("phone_number",ph.toString())
-            _activity.setCurrView(SignUpPinFragment())
+            if(ph.text.toString().length == 10) {
+                _activity.addData("phone_number", ph.text.toString())
+                _activity.setCurrView(SignUpPinFragment())
+            }
+            else
+                Toast.makeText(requireContext(),"Enter correct mobile number!",Toast.LENGTH_SHORT).show()
         }
-//        val txt = views.findViewById<TextView>(R.id.login)
-//        txt.text = "Login"
 
     }
 
