@@ -4,7 +4,6 @@
 
 - [About the Project](#about-the-project)
 - [Features](#features)
-- [Contact](#contact)
 
 ## About the Project
 
