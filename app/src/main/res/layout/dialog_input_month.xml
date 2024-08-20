@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/edit_text_month"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter month (1-12)"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/edit_text_year"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter year (e.g., 2023)"
+        android:inputType="number" />
+</LinearLayout>
