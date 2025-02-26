@@ -13,3 +13,7 @@ The Expense Tracker is a feature-rich Android application developed in Kotlin to
 - Graphical Reports: Generates insightful pie charts to visualize spending patterns.
 
 - Intuitive UI: User-friendly design with Material Design principles for seamless navigation.
+
+### Live Demo
+
+![Demo chart](https://github.com/user-attachments/assets/1b57cf21-1459-40a0-8295-b7243b84ab4b)
